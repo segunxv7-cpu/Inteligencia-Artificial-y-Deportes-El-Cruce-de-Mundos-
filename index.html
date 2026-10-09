@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA y Deportes: El Cruce de Mundos</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #111827;
+            --text-color: #f3f4f6;
+            --primary: #4f46e5;
+            --border-color: #374151;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 850px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-size: 2.2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9ca3af;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+
+        .situation-card {
+            background: #1f2937;
+            border-left: 6px solid var(--primary);
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 0 10px 10px 0;
+            display: none;
+            border-top: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .situation-card.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .counter {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.3rem;
+            color: #ffffff;
+        }
+
+        p {
+            margin: 0 0 20px 0;
+            color: #d1d5db;
+            line-height: 1.6;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+
+        button.option-btn {
+            background: #2b3544;
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        button.option-btn:hover {
+            background: #374151;
+            border-color: #6b7280;
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .results-section h2 {
+            color: #ffffff;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .summary-box {
+            background: #1f2937;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .restart-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .restart-btn:hover { background: #4338ca; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>IA y Deportes: El Cruce de Mundos</h1>
+        <div class="subtitle">Explora 10 situaciones donde la tecnología y el deporte se cruzan. Tus elecciones definirán el destino final.</div>
+
+        <!-- CONTENEDOR DE SITUACIONES (ARRANCA DIRECTAMENTE AQUÍ) -->
+        <div id="game-container"></div>
+
+        <!-- PANTALLA FINAL -->
+        <div id="results" class="results-section">
+            <h2>Simulación Finalizada</h2>
+            <p id="final-verdict-title" style="font-size: 1.3rem; font-weight: bold; margin-bottom: 15px;"></p>
+            <div class="summary-box">
+                <p id="final-summary-text" style="margin: 0;"></p>
+            </div>
+            <button class="restart-btn" onclick="reiniciarJuego()">Volver a Jugar</button>
+        </div>
+    </div>
+
+    <script>
+        const situaciones = [
+            {
+                id: 1,
+                titulo: "Fatiga Oculta",
+                texto: "Los sensores biométricos de la IA detectan microlesiones y agotamiento extremo en tu máxima figura antes de un partido clave, aunque el jugador insiste en que está perfecto.",
+                opciones: [
+                    { texto: "Respetar los datos de la IA, darle descanso y priorizar su salud física a largo plazo.", tipo: "luminoso" },
+                    { texto: "Ignorar los sensores, forzar su participación basándose en la presión competitiva y asumir el riesgo de lesión.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 2,
+                titulo: "La Tiranía del Rendimiento",
+                texto: "Un software de IA analiza el rendimiento táctico y sugiere tratar a los deportistas puramente como métricas de rendimiento, suprimiendo cualquier margen de intuición personal.",
+                opciones: [
+                    { texto: "Preservar la libertad creativa, la flexibilidad y el bienestar emocional de los atletas frente a la frialdad matemática.", tipo: "luminoso" },
+                    { texto: "Aceptar la estandarización absoluta y exigir a los atletas cumplir con los patrones exactos del algoritmo.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 3,
+                titulo: "El Rival Bajo la Lupa",
+                texto: "Una IA procesa en minutos cientos de partidos previos del contrincante, detectando patrones de debilidad defensiva que ningún humano había notado.",
+                opciones: [
+                    { texto: "Integrar el informe analítico para potenciar la estrategia táctica y el rendimiento del equipo.", tipo: "luminoso" },
+                    { texto: "Descartar por completo el informe tecnológico y fiarse exclusivamente de la improvisación en la cancha.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 4,
+                titulo: "El Algoritmo de Selección",
+                texto: "Una herramienta de IA diseñada para buscar talentos en divisiones inferiores descarta sistemáticamente perfiles atípicos de barrios vulnerables por no encajar en la estadística estándar.",
+                opciones: [
+                    { texto: "Anular el software automatizado y realizar una búsqueda presencial e inclusiva en terreno.", tipo: "luminoso" },
+                    { texto: "Confiar ciegamente en el veredicto del algoritmo para ahorrar costos y agilizar el filtrado.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 5,
+                titulo: "Entrenamiento Global",
+                texto: "Una aplicación móvil basada en IA permite que jóvenes de cualquier parte del mundo graben su técnica deportiva y reciban devoluciones profesionales gratuitas.",
+                opciones: [
+                    { texto: "Apoyar y difundir masivamente la app para democratizar el acceso al alto rendimiento.", tipo: "luminoso" },
+                    { texto: "Limitar su acceso argumentando que el desarrollo deportivo solo debe pertenecer a élites privilegiadas.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 6,
+                titulo: "Vigilancia e Intimidad",
+                texto: "Un club comercializa los datos genéticos, de descanso y biométricos detallados de sus deportistas con empresas de análisis externas sin consultarles.",
+                opciones: [
+                    { texto: "Proteger la privacidad del deportista, frenando la comercialización desregulada de su intimidad física.", tipo: "luminoso" },
+                    { texto: "Permitirlo bajo el argumento de que la monetización de datos es indispensable en el deporte moderno.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 7,
+                titulo: "El Ojo Milimétrico",
+                texto: "Se implementan sistemas de visión artificial ultrarrápidos para detectar faltas, fueras de juego y posiciones milimétricas con precisión absoluta.",
+                opciones: [
+                    { texto: "Implementar la tecnología para garantizar justicia deportiva y eliminar errores humanos graves.", tipo: "luminoso" },
+                    { texto: "Rechazarla de plano para conservar la polémica humana y la incertidumbre tradicional del arbitraje.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 8,
+                titulo: "Pérdida de Criterio Propio",
+                texto: "Los entrenadores jóvenes ya no toman decisiones tácticas durante un partido si la tablet o la IA no les sugiere la jugada exacta en tiempo real.",
+                opciones: [
+                    { texto: "Estimular el pensamiento crítico y la capacidad de adaptación humana para evitar la dependencia técnica.", tipo: "luminoso" },
+                    { texto: "Dejar que la máquina tome todas las decisiones directas sin cuestionar sus sugerencias.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 9,
+                titulo: "Deporte Adaptado Inteligente",
+                texto: "Se desarrollan prótesis y equipos deportivos inteligentes asistidos por IA que permiten a atletas paralímpicos competir con niveles de precisión inéditos.",
+                opciones: [
+                    { texto: "Invertir fuertemente en innovación tecnológica para potenciar la inclusión y accesibilidad deportiva.", tipo: "luminoso" },
+                    { texto: "Desinteresarse del proyecto y destinar los recursos únicamente al deporte convencional masivo.", tipo: "oscuro" }
+                ]
+            },
+            {
+                id: 10,
+                titulo: "El Espectáculo Simulado",
+                texto: "Una propuesta comercial sugiere utilizar IA generativa para predecir y alterar ligeramente los resultados o simular jugadas perfectas que atraigan más público por televisión.",
+                opciones: [
+                    { texto: "Defender la autenticidad, la espontaneidad y la verdad inalterable de la competencia real.", tipo: "luminoso" },
+                    { texto: "Aceptar la manipulación digital del espectáculo con tal de asegurar mayor viralidad e ingresos.", tipo: "oscuro" }
+                ]
+            }
+        ];
+
+        let currentStep = 0;
+        let elecciones = { luminoso: 0, oscuro: 0 };
+
+        function renderizarSituacion() {
+            const container = document.getElementById('game-container');
+            container.innerHTML = '';
+
+            if (currentStep >= situaciones.length) {
+                mostrarResultados();
+                return;
+            }
+
+            const sit = situaciones[currentStep];
+            const card = document.createElement('div');
+            card.className = 'situation-card active';
+            
+            card.innerHTML = `
+                <div class="counter">Situación ${sit.id} de 10</div>
+                <h3>${sit.titulo}</h3>
+                <p>${sit.texto}</p>
+                <div class="options-grid">
+                    <button class="option-btn" onclick="registrarEleccion('${sit.opciones[0].tipo}')">${sit.opciones[0].texto}</button>
+                    <button class="option-btn" onclick="registrarEleccion('${sit.opciones[1].tipo}')">${sit.opciones[1].texto}</button>
+                </div>
+            `;
+
+            container.appendChild(card);
+        }
+
+        function registrarEleccion(tipo) {
+            elecciones[tipo]++;
+            currentStep++;
+            renderizarSituacion();
+        }
+
+        function mostrarResultados() {
+            document.getElementById('game-container').style.display = 'none';
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+
+            const tituloFinal = document.getElementById('final-verdict-title');
+            const textoFinal = document.getElementById('final-summary-text');
+
+            if (elecciones.luminoso > elecciones.oscuro) {
+                tituloFinal.innerText = "Resultado Final: Lado Luminoso";
+                tituloFinal.style.color = "#38bdf8";
+                textoFinal.innerText = `Terminaste en el Lado Luminoso (${elecciones.luminoso} elecciones frente a ${elecciones.oscuro} del lado oscuro). Tus decisiones priorizaron la salud de los atletas, la democratización del acceso, la inclusión, la privacidad y la justicia a través de la tecnología, manteniendo un equilibrio ético frente a los riesgos.`;
+            } else if (elecciones.oscuro > elecciones.luminoso) {
+                tituloFinal.innerText = "Resultado Final: Lado Oscuro";
+                tituloFinal.style.color = "#c084fc";
+                textoFinal.innerText = `Terminaste en el Lado Oscuro (${elecciones.oscuro} elecciones frente a ${elecciones.luminoso} del lado luminoso). Tus decisiones se inclinaron hacia la priorización ciega del rendimiento económico, la dependencia algorítmica, la mercantilización de datos íntimos y la aceptación de riesgos éticos o sesgos con tal de alcanzar la máxima eficiencia.`;
+            } else {
+                tituloFinal.innerText = "Resultado Final: Equilibrio Absoluto";
+                tituloFinal.style.color = "#facc15";
+                textoFinal.innerText = `Mantuviste un empate exacto (5 opciones luminosas y 5 oscuras). Tu recorrido refleja una mirada crítica e intermedia, donde reconoces tanto los grandes avances tecnológicos como los peligros latentes de la digitalización en el deporte.`;
+            }
+        }
+
+        function reiniciarJuego() {
+            currentStep = 0;
+            elecciones = { luminoso: 0, oscuro: 0 };
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            renderizarSituacion();
+        }
+
+        // Iniciar el juego automáticamente al cargar la página
+        window.onload = function() {
+            renderizarSituacion();
+        };
+    </script>
+
+</body>
+</html>
